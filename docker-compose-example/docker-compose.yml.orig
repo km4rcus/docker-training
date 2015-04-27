@@ -1,0 +1,47 @@
+redisa:
+  image: redis
+
+redisb:
+  image: redis
+
+redisc:
+  image: redis
+
+weba:
+  build: .
+  command: python app.py 
+  environment:
+    - SERVER: Server_A
+  links:
+    - redisa
+  expose:
+    - "5000"
+
+webb:
+  build: .
+  command: python app.py
+  environment:
+    - SERVER: Server_B
+  links:
+    - redisb
+  expose:
+    - "5000"
+
+webc:
+  build: .
+  command: python app.py
+  environment:
+    - SERVER: Server_C
+  links:
+    - redisc
+  expose:
+    - "5000" 
+
+haproxy:
+  build: -f Dockerfile.haproxy .
+  links:
+    - weba
+    - webb
+    - webc
+  expose:
+    - "80:80"
